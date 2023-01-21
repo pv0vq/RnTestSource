@@ -1,28 +1,29 @@
-import {
-  Button,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-  ScrollView,
-  FlatList,
-} from "react-native";
+import { StyleSheet, View, FlatList, Button } from "react-native";
 import { useState, useEffect } from "react";
+import GoalItem from "./componunts/GoalItem";
+import GoalInput from "./componunts/GoalInput";
 
 export default function App() {
-  const [text, setTest] = useState("");
-  const [stateArray, setStateArray] = useState<Array<string>>([]);
-  const textHandler = (event: any) => {
-    setTest(event);
+  const [stateArray, setStateArray] = useState<Array<any>>([]);
+  const [modalState, setModalState] = useState(false);
+
+  const setModalStateHandler = () => {
+    setModalState(true);
+  };
+  const buttonHandler = (text: any) => {
+    setStateArray([
+      ...stateArray,
+      { text: text, key: Math.random().toString() },
+    ]);
   };
 
-  const buttonHandler = () => {
-    console.log(text, "text");
-    setStateArray([...stateArray, text]);
+  const deleteButtonHandler = (id: any) => {
+    console.log(id, "id");
+    setStateArray(stateArray.filter((item) => item.key !== id));
   };
 
-  const deleteButtonHandler = () => {
-    setStateArray([]);
+  const modalCancelHandler = () => {
+    setModalState(false);
   };
 
   useEffect(() => {
@@ -31,31 +32,23 @@ export default function App() {
 
   return (
     <View style={styles.appContainer}>
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.textInput}
-          placeholder="기본텍스트"
-          onChangeText={textHandler}
-        />
-        <Button title="추가 버튼" onPress={buttonHandler} />
-        {/* <Button title="초기회 버튼" onPress={deleteButtonHandler} /> */}
-      </View>
+      <Button title="모달열기" color="#311b6b" onPress={setModalStateHandler} />
+      <GoalInput
+        onButton={(text: any) => buttonHandler(text)}
+        visible={modalState}
+        cancel={modalCancelHandler}
+      />
       <View style={styles.goalsContainer}>
-        {/* <ScrollView alwaysBounceVertical={false}>
-          {stateArray.map((item, i) => (
-            <View style={styles.listStyle} key={i}>
-              <Text style={styles.listTextStyle}>{item}</Text>
-            </View>
-          ))}
-        </ScrollView> */}
         <FlatList
           data={stateArray}
           alwaysBounceVertical={false}
           renderItem={(itemData) => {
             return (
-              <View style={styles.listStyle} key={itemData.index}>
-                <Text style={styles.listTextStyle}>{itemData.item}</Text>
-              </View>
+              <GoalItem
+                id={itemData.item.key}
+                text={itemData.item.text}
+                onDeleteItem={deleteButtonHandler}
+              />
             );
           }}
         ></FlatList>
@@ -76,6 +69,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 50,
     paddingHorizontal: 16,
+    backgroundColor: "#b259ee",
   },
   inputContainer: {
     flex: 1,
@@ -95,14 +89,5 @@ const styles = StyleSheet.create({
   },
   goalsContainer: {
     flex: 3,
-  },
-  listStyle: {
-    margin: 8,
-    padding: 8,
-    borderRadius: 6, // 아이폰에서는 적용이 안됨(text 컴포넌트에 선언시) 따라서 스타일은 view 선언해줘야함 (변환시켜주는곳에서 오류인듯?)
-    backgroundColor: "#5e0acc",
-  },
-  listTextStyle: {
-    color: "white",
   },
 });
